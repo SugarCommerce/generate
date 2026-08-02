@@ -27,13 +27,13 @@ PHP 8.5+ (`ext-intl` optional, for better transliteration)
 ## Installation
 
 ```bash
-composer require sugarmill/generate
+composer require sugarcommerce/generate
 ```
 
 ## UUIDs
 
 ```php
-use SugarMill\Generate\Uuid;
+use Sugar\Generate\Uuid;
 
 Uuid::v4();                       // random
 Uuid::v7();                       // time-ordered
@@ -50,7 +50,7 @@ Use **v4** where the value is exposed and the creation time should not be — a 
 ## Codes
 
 ```php
-use SugarMill\Generate\Code;
+use Sugar\Generate\Code;
 
 Code::license();                    // 'WZPRV-R06ZZ-4F2CR-T73HR'
 Code::license( 'ACME' );            // 'ACME-AS835-Z0ZGE-BVQE5-B7H4W'
@@ -70,7 +70,7 @@ The alphabet is **Crockford base32** — `0-9` and `A-Z` without `I`, `L`, `O` o
 ## Slugs
 
 ```php
-use SugarMill\Generate\Slug;
+use Sugar\Generate\Slug;
 
 Slug::make( 'Héllo Wörld!' );        // 'hello-world'
 Slug::make( '日本語のタイトル' );      // 'ri-ben-yunotaitoru'
@@ -87,7 +87,7 @@ Where nothing transliterable survives — an emoji-only title — you get a shor
 ## Tokens and API keys
 
 ```php
-use SugarMill\Generate\Token;
+use Sugar\Generate\Token;
 
 Token::hex( 32 );            // 64 hex characters
 Token::url_safe( 32 );       // base64url, no padding
