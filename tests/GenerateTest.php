@@ -2,7 +2,7 @@
 /**
  * Generate test suite.
  *
- * @package   Sugar\Generate
+ * @package   SugarCommerce\Generate
  * @copyright Copyright (c) 2026, ArrayPress Limited
  * @license   GPL-2.0-or-later
  * @since     1.0.0
@@ -10,15 +10,15 @@
 
 declare( strict_types=1 );
 
-namespace Sugar\Generate\Tests;
+namespace SugarCommerce\Generate\Tests;
 
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\RequiresPhpExtension;
 use PHPUnit\Framework\TestCase;
-use Sugar\Generate\Code;
-use Sugar\Generate\Slug;
-use Sugar\Generate\Token;
-use Sugar\Generate\Uuid;
+use SugarCommerce\Generate\Code;
+use SugarCommerce\Generate\Slug;
+use SugarCommerce\Generate\Token;
+use SugarCommerce\Generate\Uuid;
 
 final class GenerateTest extends TestCase {
 
