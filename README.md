@@ -100,7 +100,13 @@ $key['prefix'];   // 'sk_65CcAKIT'      — store, to identify the key in a list
 $key['hash'];     // sha256 of the key  — store this
 
 Token::matches( $presented, $key['hash'] );   // constant time
+Token::digest( $presented );                  // the stored form, for lookup
 ```
+
+`matches()` is for checking a key against one you already found. `digest()` is
+for finding it in the first place — a `WHERE key_hash = ?` needs the digest,
+not a comparison. Use it rather than writing `hash( 'sha256', $key )` in your
+own code, or the two definitions of "the stored form" eventually disagree.
 
 Store the hash, not the key. A leaked database of hashes is an inconvenience; a leaked database of keys is every customer's account.
 

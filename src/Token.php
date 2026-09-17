@@ -125,8 +125,33 @@ final readonly class Token {
 		return array(
 			'key'    => $key,
 			'prefix' => substr( $key, 0, strlen( $prefix ) + 1 + 8 ),
-			'hash'   => hash( 'sha256', $key ),
+			'hash'   => self::digest( $key ),
 		);
+	}
+
+	/**
+	 * The stored form of a key.
+	 *
+	 * Split out because three callers need it and two of them are in this
+	 * class: a key is hashed when it is minted, when it is verified, and —
+	 * in any store that looks a key up rather than iterating — when it is
+	 * found. That third caller lives in the application, so the digest has
+	 * to be reachable rather than private, or the application writes its own
+	 * and the two drift.
+	 *
+	 * Unkeyed on purpose. The lookup happens by hash, so it must be
+	 * derivable from the key alone; there is no secret a database that has
+	 * been read could be missing. The key's own entropy is what makes that
+	 * safe — see matches() for why a fast hash is right here.
+	 *
+	 * @since 1.1.0
+	 *
+	 * @param string $key The key, as issued.
+	 *
+	 * @return string 64-character hex digest.
+	 */
+	public static function digest( #[\SensitiveParameter] string $key ): string {
+		return hash( 'sha256', $key );
 	}
 
 	/**
@@ -147,7 +172,7 @@ final readonly class Token {
 	 * @return bool
 	 */
 	public static function matches( #[\SensitiveParameter] string $key, string $hash ): bool {
-		return hash_equals( $hash, hash( 'sha256', $key ) );
+		return hash_equals( $hash, self::digest( $key ) );
 	}
 
 	/**

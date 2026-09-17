@@ -311,4 +311,20 @@ final class GenerateTest extends TestCase {
 
 		$this->assertCount( 200, array_unique( $keys ) );
 	}
+
+	public function test_digest_is_what_api_key_stores(): void {
+		$key = Token::api_key();
+
+		$this->assertSame( $key['hash'], Token::digest( $key['key'] ) );
+	}
+
+	public function test_digest_is_stable_and_hex(): void {
+		$this->assertSame( Token::digest( 'sk_abc' ), Token::digest( 'sk_abc' ) );
+		$this->assertMatchesRegularExpression( '/^[a-f0-9]{64}$/', Token::digest( 'sk_abc' ) );
+		$this->assertNotSame( Token::digest( 'sk_abc' ), Token::digest( 'sk_abd' ) );
+	}
+
+	public function test_digest_agrees_with_matches(): void {
+		$this->assertTrue( Token::matches( 'sk_abc', Token::digest( 'sk_abc' ) ) );
+	}
 }
