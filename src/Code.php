@@ -35,12 +35,12 @@ final readonly class Code {
 	 * Handwriting-ambiguous letters, folded onto the digits they
 	 * resemble. Crockford's rule.
 	 */
-	private const FOLD = array( 'O' => '0', 'I' => '1', 'L' => '1' );
+	private const array FOLD = array( 'O' => '0', 'I' => '1', 'L' => '1' );
 
 	/**
 	 * Crockford base32.
 	 */
-	private const ALPHABET = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
+	private const string ALPHABET = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
 
 	/**
 	 * Generate a code.

@@ -30,7 +30,7 @@ final readonly class Token {
 	/**
 	 * Alphanumeric, no ambiguity concerns — these are copy-pasted, not read.
 	 */
-	private const ALPHABET = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+	private const string ALPHABET = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 
 	/**
 	 * A hexadecimal token.

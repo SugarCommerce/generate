@@ -31,7 +31,7 @@ final readonly class Slug {
 	 * Apostrophe forms that join words rather than separating them, so
 	 * "Dave's" becomes "daves" and not "dave-s".
 	 */
-	private const APOSTROPHES = array( "'", '’', '`', '´' );
+	private const array APOSTROPHES = array( "'", '’', '`', '´' );
 
 	/**
 	 * Slugify a string.
