@@ -232,6 +232,39 @@ final class GenerateTest extends TestCase {
 		$this->assertFalse( Slug::is_valid( '' ) );
 	}
 
+	/**
+	 * Typed slugs and what clean() makes of them, with min 3, max 12 and
+	 * 'admin' reserved.
+	 *
+	 * @return array<string, array{mixed, string}>
+	 */
+	public static function typed_slugs(): array {
+		return array(
+			'plain'             => array( 'my-shop', 'my-shop' ),
+			'lower-cased'       => array( '  My-Shop ', 'my-shop' ),
+			'digits'            => array( '123', '123' ),
+			'leading hyphen'    => array( '-shop', '' ),
+			'trailing hyphen'   => array( 'shop-', '' ),
+			'space inside'      => array( 'my shop', '' ),
+			'underscore'        => array( 'my_shop', '' ),
+			'accented'          => array( 'café', '' ),
+			'too short'         => array( 'ab', '' ),
+			'too long'          => array( 'abcdefghijklm', '' ),
+			'reserved'          => array( 'Admin', '' ),
+			'not scalar'        => array( array( 'shop' ), '' ),
+			'empty'             => array( '', '' ),
+		);
+	}
+
+	#[DataProvider( 'typed_slugs' )]
+	public function test_clean_accepts_a_typed_slug_or_nothing( mixed $value, string $expected ): void {
+		$this->assertSame( $expected, Slug::clean( $value, 3, 12, array( 'admin' ) ) );
+	}
+
+	public function test_clean_has_no_length_cap_by_default(): void {
+		$this->assertSame( str_repeat( 'a', 200 ), Slug::clean( str_repeat( 'a', 200 ) ) );
+	}
+
 	/* ─── Tokens ────────────────────────────────────────────────────── */
 
 	public function test_hex_tokens_are_the_right_length(): void {
@@ -326,5 +359,43 @@ final class GenerateTest extends TestCase {
 
 	public function test_digest_agrees_with_matches(): void {
 		$this->assertTrue( Token::matches( 'sk_abc', Token::digest( 'sk_abc' ) ) );
+	}
+
+	public function test_api_key_prefix_can_show_fewer_characters(): void {
+		$key = Token::api_key( 'sc_sk_live', 7 );
+
+		$this->assertSame( 18, strlen( $key['prefix'] ) );
+		$this->assertStringStartsWith( 'sc_sk_live_', $key['prefix'] );
+		$this->assertStringStartsWith( $key['prefix'], $key['key'] );
+		$this->assertSame( 'sk_', Token::api_key( 'sk', 0 )['prefix'] );
+	}
+
+	public function test_api_key_refuses_to_show_most_of_the_secret(): void {
+		$this->expectException( \InvalidArgumentException::class );
+
+		Token::api_key( 'sk', 13 );
+	}
+
+	/* ─── Identifiers ───────────────────────────────────────────────── */
+
+	public function test_an_id_is_prefixed_hex(): void {
+		$this->assertMatchesRegularExpression( '/^evt_[a-f0-9]{16}$/', Token::id( 'evt' ) );
+		$this->assertMatchesRegularExpression( '/^[a-f0-9]{8}$/', Token::id( '', 4 ) );
+	}
+
+	public function test_ids_do_not_repeat(): void {
+		$ids = array();
+
+		for ( $i = 0; $i < 200; $i++ ) {
+			$ids[] = Token::id( 'x' );
+		}
+
+		$this->assertCount( 200, array_unique( $ids ) );
+	}
+
+	public function test_an_id_needs_some_randomness(): void {
+		$this->expectException( \InvalidArgumentException::class );
+
+		Token::id( 'x', 3 );
 	}
 }

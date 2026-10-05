@@ -129,6 +129,47 @@ final readonly class Slug {
 	}
 
 	/**
+	 * A slug somebody typed, accepted as it is or not at all.
+	 *
+	 * The counterpart to make(), for a name a person chose — a shop's
+	 * handle, a username in a URL — where quietly rewriting what they typed
+	 * would give them an address they did not pick. So nothing is
+	 * transliterated or replaced: the value is trimmed and lower-cased (a
+	 * URL that is case-sensitive is one people get wrong), and then it is
+	 * either a slug or ''.
+	 *
+	 * Letters and digits, with hyphens inside and nowhere else: a leading
+	 * one reads as a command-line flag, a trailing one is invisible when the
+	 * address is read aloud. Names on the reserved list are refused, because
+	 * a slug that shares a path with real routes — `/s/admin` beside
+	 * `/admin` — is a collision the day somebody adds one.
+	 *
+	 * @since 1.2.0
+	 *
+	 * @param mixed    $value    Submitted value. Anything not scalar is ''.
+	 * @param int      $min      Shortest allowed. Two-character names are
+	 *                           the ones people squat, so three is common.
+	 * @param int      $max      Longest allowed. 0 for no limit.
+	 * @param string[] $reserved Names nobody may take, lower-case.
+	 *
+	 * @return string The slug, or '' when it is not usable.
+	 */
+	public static function clean( mixed $value, int $min = 1, int $max = 0, array $reserved = array() ): string {
+		$value  = is_scalar( $value ) ? strtolower( trim( (string) $value ) ) : '';
+		$length = strlen( $value );
+
+		if ( 1 !== preg_match( '/^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/', $value ) ) {
+			return '';
+		}
+
+		if ( $length < $min || ( $max > 0 && $length > $max ) ) {
+			return '';
+		}
+
+		return in_array( $value, $reserved, true ) ? '' : $value;
+	}
+
+	/**
 	 * Best-effort conversion to Latin script.
 	 *
 	 * @since 1.0.0

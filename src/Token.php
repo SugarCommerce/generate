@@ -111,22 +111,63 @@ final readonly class Token {
 	 * Store `hash`, never `key`.
 	 *
 	 * @since 1.0.0
+	 * @since 1.2.0 `$shown`, for a store whose prefix column was sized for
+	 *              a different number of secret characters.
 	 *
 	 * @param string $prefix Product prefix, e.g. `sk`.
+	 * @param int    $shown  Characters of the secret kept in the stored
+	 *                       prefix. Each one shown is one fewer to guess,
+	 *                       so keep it short.
 	 *
 	 * @return array{key: string, prefix: string, hash: string}
 	 *
-	 * @throws \Random\RandomException When the CSPRNG is unavailable.
+	 * @throws \InvalidArgumentException When `$shown` is negative or above 12.
+	 * @throws \Random\RandomException   When the CSPRNG is unavailable.
 	 */
-	public static function api_key( string $prefix = 'sk' ): array {
+	public static function api_key( string $prefix = 'sk', int $shown = 8 ): array {
+		if ( $shown < 0 || $shown > 12 ) {
+			throw new \InvalidArgumentException( 'An API key prefix may show between 0 and 12 characters of the secret.' );
+		}
+
 		$secret = self::url_safe( 32 );
 		$key    = $prefix . '_' . $secret;
 
 		return array(
 			'key'    => $key,
-			'prefix' => substr( $key, 0, strlen( $prefix ) + 1 + 8 ),
+			'prefix' => substr( $key, 0, strlen( $prefix ) + 1 + $shown ),
 			'hash'   => self::digest( $key ),
 		);
+	}
+
+	/**
+	 * A short random identifier, optionally prefixed: `evt_9f2c41d0a7b3e655`.
+	 *
+	 * For naming a thing — a delivery, an event, a request — so a log line
+	 * and a support ticket can point at the same one. Not a secret: 64 bits
+	 * by default is plenty to never collide in practice and too few to be
+	 * an authenticator, so never use one as a token. {@see self::hex()} is
+	 * for that, and refuses anything under 128 bits.
+	 *
+	 * The prefix says what kind of thing it is, the way Stripe's `evt_` and
+	 * `cus_` do, so an id pasted into the wrong field is recognisably wrong.
+	 *
+	 * @since 1.2.0
+	 *
+	 * @param string $prefix Kind, without the underscore. '' for none.
+	 * @param int    $bytes  Randomness in bytes; the id has twice as many
+	 *                       hex characters.
+	 *
+	 * @return string
+	 *
+	 * @throws \InvalidArgumentException Below 4 bytes.
+	 * @throws \Random\RandomException   When the CSPRNG is unavailable.
+	 */
+	public static function id( string $prefix = '', int $bytes = 8 ): string {
+		if ( $bytes < 4 ) {
+			throw new \InvalidArgumentException( 'An identifier needs at least 4 bytes of randomness.' );
+		}
+
+		return ( '' === $prefix ? '' : $prefix . '_' ) . bin2hex( random_bytes( $bytes ) );
 	}
 
 	/**

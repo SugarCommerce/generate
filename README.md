@@ -84,6 +84,19 @@ Slug::is_valid( $slug );
 
 Where nothing transliterable survives — an emoji-only title — you get a short random slug rather than an empty string, because empty slugs collide with each other.
 
+### Slugs somebody typed
+
+```php
+Slug::clean( '  My-Shop ', 3, 40, array( 'admin', 'api' ) );   // 'my-shop'
+Slug::clean( 'my shop' );                                      // ''
+```
+
+`make()` rewrites a title into a slug; `clean()` takes a slug a person chose — a
+shop handle, a username — and accepts it as typed or not at all, because quietly
+rewriting it would give them an address they did not pick. Lower-cased; letters,
+digits and inner hyphens only; length bounds; a reserved list for names that
+would collide with real routes.
+
 ## Tokens and API keys
 
 ```php
@@ -101,7 +114,14 @@ $key['hash'];     // sha256 of the key  — store this
 
 Token::matches( $presented, $key['hash'] );   // constant time
 Token::digest( $presented );                  // the stored form, for lookup
+
+Token::api_key( 'sk_live', 6 );               // a prefix showing 6 characters of the secret
+Token::id( 'evt' );                           // 'evt_9f2c41d0a7b3e655' — names a thing, never a secret
 ```
+
+`id()` is for naming a delivery, an event or a request so a log line and a
+support ticket point at the same one. 64 bits by default: enough to never
+collide, too few to authenticate anything — use `hex()` for that.
 
 `matches()` is for checking a key against one you already found. `digest()` is
 for finding it in the first place — a `WHERE key_hash = ?` needs the digest,
@@ -119,7 +139,7 @@ composer install
 composer test
 ```
 
-50 tests — UUID version and variant bits asserted against RFC 9562, v7 monotonicity across a millisecond boundary, alphabet exclusions, transliteration across four scripts, and constant-time comparison behaviour.
+72 tests — UUID version and variant bits asserted against RFC 9562, v7 monotonicity across a millisecond boundary, alphabet exclusions, transliteration across four scripts, typed slugs refused rather than rewritten, and constant-time comparison behaviour.
 
 ## License
 
