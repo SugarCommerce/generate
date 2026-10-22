@@ -125,7 +125,7 @@ final readonly class Slug {
 	public static function is_valid( string $slug, string $separator = '-' ): bool {
 		$quoted = preg_quote( $separator, '/' );
 
-		return 1 === preg_match( '/^[a-z0-9]+(?:' . $quoted . '[a-z0-9]+)*$/', $slug );
+		return 1 === preg_match( '/^[a-z0-9]+(?:' . $quoted . '[a-z0-9]+)*$/D', $slug );
 	}
 
 	/**
@@ -160,7 +160,7 @@ final readonly class Slug {
 		$value  = is_scalar( $value ) ? strtolower( trim( (string) $value ) ) : '';
 		$length = strlen( $value );
 
-		if ( 1 !== preg_match( '/^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/', $value ) ) {
+		if ( 1 !== preg_match( '/^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/D', $value ) ) {
 			return '';
 		}
 

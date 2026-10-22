@@ -93,6 +93,17 @@ final class GenerateTest extends TestCase {
 		$this->assertNull( Uuid::timestamp( 'not-a-uuid' ) );
 	}
 
+	/**
+	 * `$` also matches just before a final newline, so a UUID with one
+	 * on the end passed, version or no version.
+	 */
+	public function test_a_uuid_with_a_trailing_newline_is_rejected(): void {
+		$uuid = Uuid::v7();
+
+		$this->assertFalse( Uuid::is_valid( $uuid . "\n" ) );
+		$this->assertFalse( Uuid::is_valid( $uuid . "\n", 7 ) );
+	}
+
 	public function test_a_version_outside_one_to_eight_matches_nothing(): void {
 		$this->assertFalse( Uuid::is_valid( '0' . substr( Uuid::v4(), 1 ), 10 ) );
 		$this->assertFalse( Uuid::is_valid( Uuid::v4(), 0 ) );
@@ -113,6 +124,7 @@ final class GenerateTest extends TestCase {
 			'bad version'  => array( '0189d6d4-d0f3-9c8a-9c1e-2f3a4b5c6d7e' ),
 			'bad variant'  => array( '0189d6d4-d0f3-7c8a-0c1e-2f3a4b5c6d7e' ),
 			'not hex'      => array( 'zzzzzzzz-d0f3-7c8a-9c1e-2f3a4b5c6d7e' ),
+			'newline'      => array( "0189d6d4-d0f3-7c8a-9c1e-2f3a4b5c6d7e\n" ),
 		);
 	}
 
@@ -235,6 +247,8 @@ final class GenerateTest extends TestCase {
 		$this->assertFalse( Slug::is_valid( 'hello--world' ) );
 		$this->assertFalse( Slug::is_valid( '-hello' ) );
 		$this->assertFalse( Slug::is_valid( '' ) );
+		$this->assertFalse( Slug::is_valid( "hello-world\n" ) );
+		$this->assertFalse( Slug::is_valid( "hello_world\n", '_' ) );
 	}
 
 	/**
