@@ -86,11 +86,16 @@ final readonly class Uuid {
 	 * @since 1.0.0
 	 *
 	 * @param string   $uuid    Candidate.
-	 * @param int|null $version Require a specific version, or null for any.
+	 * @param int|null $version Require a specific version (1 to 8), or null
+	 *                          for any.
 	 *
-	 * @return bool
+	 * @return bool False for a version outside 1 to 8.
 	 */
 	public static function is_valid( string $uuid, ?int $version = null ): bool {
+		if ( null !== $version && ( $version < 1 || $version > 8 ) ) {
+			return false;
+		}
+
 		$pattern = null === $version
 			? '/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i'
 			: '/^[0-9a-f]{8}-[0-9a-f]{4}-' . $version . '[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i';
@@ -139,9 +144,11 @@ final readonly class Uuid {
 	 *
 	 * @param string $bytes 16 raw bytes.
 	 *
-	 * @return string
+	 * @return string Lower-case hex in 8-4-4-4-12 groups.
 	 */
 	private static function format( string $bytes ): string {
-		return implode( '-', unpack( 'H8a/H4b/H4c/H4d/H12e', $bytes ) ?: array() );
+		$hex = bin2hex( $bytes );
+
+		return substr( $hex, 0, 8 ) . '-' . substr( $hex, 8, 4 ) . '-' . substr( $hex, 12, 4 ) . '-' . substr( $hex, 16, 4 ) . '-' . substr( $hex, 20, 12 );
 	}
 }

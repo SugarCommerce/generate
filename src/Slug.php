@@ -150,7 +150,9 @@ final readonly class Slug {
 	 * @param int      $min      Shortest allowed. Two-character names are
 	 *                           the ones people squat, so three is common.
 	 * @param int      $max      Longest allowed. 0 for no limit.
-	 * @param string[] $reserved Names nobody may take, lower-case.
+	 * @param string[] $reserved Names nobody may take. Compared without
+	 *                           regard to case, so `Admin` here still
+	 *                           refuses `admin`.
 	 *
 	 * @return string The slug, or '' when it is not usable.
 	 */
@@ -166,7 +168,7 @@ final readonly class Slug {
 			return '';
 		}
 
-		return in_array( $value, $reserved, true ) ? '' : $value;
+		return in_array( $value, array_map( strtolower( ... ), $reserved ), true ) ? '' : $value;
 	}
 
 	/**
@@ -176,18 +178,21 @@ final readonly class Slug {
 	 *
 	 * @param string $text Source text.
 	 *
-	 * @return string
+	 * @return string ASCII where a conversion was found; the input as it
+	 *                was when neither ext-intl nor iconv could help.
 	 */
 	private static function transliterate( string $text ): string {
 		static $transliterator = null;
 
+		// Built once per process: false when ext-intl is missing or the
+		// rule will not compile, so the check is not repeated either.
 		if ( null === $transliterator ) {
 			$transliterator = class_exists( \Transliterator::class )
 				? ( \Transliterator::create( 'Any-Latin; Latin-ASCII' ) ?? false )
 				: false;
 		}
 
-		if ( false !== $transliterator ) {
+		if ( $transliterator instanceof \Transliterator ) {
 			$result = $transliterator->transliterate( $text );
 
 			if ( false !== $result ) {

@@ -93,6 +93,11 @@ final class GenerateTest extends TestCase {
 		$this->assertNull( Uuid::timestamp( 'not-a-uuid' ) );
 	}
 
+	public function test_a_version_outside_one_to_eight_matches_nothing(): void {
+		$this->assertFalse( Uuid::is_valid( '0' . substr( Uuid::v4(), 1 ), 10 ) );
+		$this->assertFalse( Uuid::is_valid( Uuid::v4(), 0 ) );
+	}
+
 	#[DataProvider( 'malformed_uuids' )]
 	public function test_malformed_uuids_are_rejected( string $uuid ): void {
 		$this->assertFalse( Uuid::is_valid( $uuid ) );
@@ -259,6 +264,11 @@ final class GenerateTest extends TestCase {
 	#[DataProvider( 'typed_slugs' )]
 	public function test_clean_accepts_a_typed_slug_or_nothing( mixed $value, string $expected ): void {
 		$this->assertSame( $expected, Slug::clean( $value, 3, 12, array( 'admin' ) ) );
+	}
+
+	public function test_a_reserved_name_given_in_capitals_is_still_refused(): void {
+		$this->assertSame( '', Slug::clean( 'admin', 3, 0, array( 'Admin', 'API' ) ) );
+		$this->assertSame( '', Slug::clean( 'api', 3, 0, array( 'Admin', 'API' ) ) );
 	}
 
 	public function test_clean_has_no_length_cap_by_default(): void {

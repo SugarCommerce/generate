@@ -225,6 +225,8 @@ final readonly class Token {
 	 *
 	 * @return void
 	 *
+	 * @phpstan-assert int<16, max> $bytes
+	 *
 	 * @throws \InvalidArgumentException Below 16 bytes.
 	 */
 	private static function assert_entropy( int $bytes ): void {
